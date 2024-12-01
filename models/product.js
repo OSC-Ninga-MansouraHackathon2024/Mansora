@@ -31,24 +31,6 @@ const productSchema = mongoose.Schema(
       max: 5,
       default: 1.3,
     },
-    location: {
-      name: {
-        type: String,
-        trim: true,
-      },
-      location: {
-        type: {
-          type: String,
-          enum: ["Point"],
-          required: true,
-        },
-        coordinates: {
-          type: [Number],
-          required: true,
-          default: [0, 0],
-        },
-      },
-    },
     discount: {
       type: Number,
       required: true,
@@ -65,11 +47,6 @@ const productSchema = mongoose.Schema(
       min: 0,
     },
     category: {
-      required: true,
-      type: String,
-      trim: true,
-    },
-    brand: {
       required: true,
       type: String,
       trim: true,

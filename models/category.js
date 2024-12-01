@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Product = require("./product");
 
 const categorySchema = mongoose.Schema({
   name: {
@@ -6,10 +7,9 @@ const categorySchema = mongoose.Schema({
     type: String,
     trim: true,
   },
-  imagePath: {
-    require: true,
-    type: String,
-    trim: true,
+  products: {
+    type: Array,
+    default: [],
   },
 });
 

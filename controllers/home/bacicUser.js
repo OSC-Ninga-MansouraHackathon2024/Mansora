@@ -18,9 +18,6 @@ const addProduct = async (req, res) => {
       title,
       price,
       description,
-      locationName,
-      coordinatesX,
-      coordinatesY,
       discount,
       remain,
       brand,
@@ -33,13 +30,6 @@ const addProduct = async (req, res) => {
         price,
         description,
         images: pathsArray,
-        location: {
-          name: locationName,
-          location: {
-            type: "Point",
-            coordinates: [coordinatesX, coordinatesY],
-          },
-        },
         discount,
         remain,
         brand,
@@ -74,9 +64,6 @@ const editProduct = async (req, res) => {
       title,
       price,
       description,
-      locationName,
-      coordinatesX,
-      coordinatesY,
       discount,
       remain,
       brand,
@@ -89,24 +76,6 @@ const editProduct = async (req, res) => {
       if (title) query.title = title;
       if (price) query.price = price;
       if (description) query.description = description;
-      if (locationName || coordinatesX || coordinatesY) {
-        if (!locationName) {
-          return res.status(400).json({ message: "please enter locationName" });
-        }
-        if (!coordinatesX) {
-          return res.status(400).json({ message: "please enter coordinatesX" });
-        }
-        if (!coordinatesY) {
-          return res.status(400).json({ message: "please enter coordinatesY" });
-        }
-        query.location = {
-          name: locationName,
-          location: {
-            type: "Point",
-            coordinates: [coordinatesX, coordinatesY],
-          },
-        };
-      }
       if (discount) query.discount = discount;
       if (remain) query.remain = remain;
       if (brand) query.brand = brand;

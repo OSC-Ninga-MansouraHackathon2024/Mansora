@@ -2,8 +2,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const faker = require("faker");
-const fs = require("fs").promises;
 const path = require("path");
 const multer = require("multer");
 
@@ -95,16 +93,6 @@ const generateFakeProduct = async (count) => {
         description: faker.lorem.paragraph(),
         images: [generateRandomImageUrl()],
         rating: faker.datatype.number({ min: 1, max: 5 }),
-        location: {
-          name: faker.address.city(),
-          location: {
-            type: "Point",
-            coordinates: [
-              parseFloat(faker.address.longitude()),
-              parseFloat(faker.address.latitude()),
-            ],
-          },
-        },
         discount: faker.datatype.number({ min: 0, max: 50 }),
         remain: faker.datatype.number({ min: 1, max: 100 }),
         sold: faker.datatype.number({ min: 0, max: 1000 }),
@@ -119,7 +107,19 @@ const generateFakeProduct = async (count) => {
   }
 };
 
-async function storeImages() {
+async function storeImages(name) {
+  try {
+    const Categorya = new Category({
+      name: name,
+    });
+    await Categorya.save();
+    console.log("saved successfully");
+  } catch (err) {
+    console.error("Error storing:", err);
+  }
+}
+
+async function storeImagesBanner() {
   try {
     const directoryPath = path.join(__dirname, "../images/banners");
     console.log(directoryPath);
@@ -161,13 +161,6 @@ const productTest = async (count) => {
       description,
       images: [generateRandomImageUrl()],
       rating,
-      location: {
-        name: "Egypt",
-        location: {
-          type: "Point",
-          coordinates: [0, 1],
-        },
-      },
       discount,
       remain,
       sold,
@@ -194,32 +187,31 @@ dataRouter.post(
         discount,
         remain,
         sold,
-        brand,
         category,
       } = req.body;
       const images = req.files.map(
-        (obj) => "https://marketi-app.onrender.com\\api\\v1\\" + obj.path
+        (obj) => "https://mansora.onrender.com\\api\\v1\\" + obj.path
       );
-      const product = new Product({
+      const existingCategory = await Category.findOne({ name: category });
+      if (!existingCategory) {
+        return res.status(500).json({ message: "category not found" });
+      }
+      let product = new Product({
         title,
         price,
         description,
         images,
         rating,
-        location: {
-          name: "Egypt",
-          location: {
-            type: "Point",
-            coordinates: [0, 1],
-          },
-        },
         discount,
         remain,
         sold,
-        brand,
         category,
       });
-      await product.save();
+      product = await product.save();
+      await Category.updateOne(
+        { _id: existingCategory._id },
+        { $push: { products: product._id } }
+      );
       console.log(`fake products generated and saved to the database.`);
       res.send(`product generated..`);
     } catch (error) {
@@ -229,9 +221,15 @@ dataRouter.post(
   }
 );
 
+// dataRouter.get("/gen", async (req, res) => {
+//   const { name } = req.body;
+//   await storeImages(name);
+//   res.send(`product generated..`);
+// });
+
 dataRouter.get("/gen", async (req, res) => {
-  // await generateFakeProduct(100);
-  await productTest();
+  const { name } = req.body;
+  await storeImages(name);
   res.send(`product generated..`);
 });
 
