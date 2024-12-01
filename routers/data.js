@@ -233,22 +233,6 @@ dataRouter.get("/gen", async (req, res) => {
   res.send(`product generated..`);
 });
 
-dataRouter.get("/start", async (req, res) => {
-  const randomProducts = await Product.aggregate([{ $sample: { size: 10 } }]);
-  // const email = existingUser.email;
-  // const image = await Image.findOne({ userEmail: email });
-  // const base64Image = Buffer.from(image.data).toString("base64");
-  // console.log(image.data);
-  // console.log(base64Image);
-  res.json({
-    // name: existingUser.name,
-    // image: base64Image,
-    statusCode: 200,
-    status: true,
-    products: randomProducts,
-  });
-});
-
 dataRouter.get("/image", async (req, res) => {
   try {
     console.log("here");
