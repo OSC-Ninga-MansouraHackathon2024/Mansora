@@ -4,6 +4,7 @@ const fs = require("fs").promises;
 
 // imports
 const Product = require("../../models/product");
+const Supplier = require("../../models/supplier");
 const Category = require("../../models/category");
 const Brand = require("../../models/brand");
 const TopSearch = require("../../models/topSearch");
@@ -61,14 +62,65 @@ const allProducts = async (req, res) => {
   }
 };
 
+const allSuppliers = async (req, res) => {
+  try {
+    const { skip, search } = req.body;
+    const query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+      const existingSearch = await TopSearch.findOne({
+        $or: [{ data: { $regex: search, $options: "i" } }],
+      });
+      if (existingSearch) {
+        const number = existingSearch.number + 1;
+        await TopSearch.updateOne(
+          { _id: existingSearch._id },
+          { $set: { number } }
+        );
+      } else {
+        const topSearch = new TopSearch({ data: search });
+        await topSearch.save();
+      }
+    }
+    const list = await Supplier.find(query)
+      .skip(skip * 10)
+      .limit(10)
+      .exec();
+    if (list.length === 0) {
+      return res.status(404).json({ message: "No results found." });
+    } else {
+      return res.status(200).json({ list });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 const getProduct = async (req, res) => {
   try {
-    const { ProductId } = req.query;
-    const existingProduct = await Product.findOne({ _id: ProductId });
+    const { productId } = req.query;
+    const existingProduct = await Product.findOne({ _id: productId });
     if (!existingProduct) {
       return res.status(404).json({ message: "Product not found." });
     } else {
       return res.status(200).json({ existingProduct });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const getSupplier = async (req, res) => {
+  try {
+    const { supplierId } = req.query;
+    const existingSupplier = await Supplier.findOne({ _id: supplierId });
+    if (!existingSupplier) {
+      return res.status(404).json({ message: "Supplier not found." });
+    } else {
+      return res.status(200).json({ existingSupplier });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -147,7 +199,9 @@ const allBanners = async (req, res) => {
 
 module.exports = {
   allProducts,
+  allSuppliers,
   getProduct,
+  getSupplier,
   allBrands,
   allCategories,
   allBanners,

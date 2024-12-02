@@ -8,6 +8,7 @@ const multer = require("multer");
 // imports
 const User = require("../models/user");
 const Product = require("../models/product");
+const Supplier = require("../models/supplier");
 const Image = require("../models/image");
 const Brand = require("../models/brand");
 const Category = require("../models/category");
@@ -221,11 +222,31 @@ dataRouter.post(
   }
 );
 
-// dataRouter.get("/gen", async (req, res) => {
-//   const { name } = req.body;
-//   await storeImages(name);
-//   res.send(`product generated..`);
-// });
+dataRouter.post(
+  "/createSupplier",
+  upload.array("files", 5),
+  async (req, res) => {
+    try {
+      const { title, description, rating, location } = req.body;
+      const images = req.files.map(
+        (obj) => "https://mansora.onrender.com\\api\\v1\\" + obj.path
+      );
+      let supplier = new Supplier({
+        title,
+        description,
+        images,
+        rating,
+        location,
+      });
+      supplier = await supplier.save();
+      console.log(`fake products generated and saved to the database.`);
+      res.send(`product generated..`);
+    } catch (error) {
+      console.error("Error generating fake products:", error);
+      return res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 dataRouter.get("/gen", async (req, res) => {
   const { name } = req.body;
