@@ -61,6 +61,20 @@ const allProducts = async (req, res) => {
   }
 };
 
+const getProduct = async (req, res) => {
+  try {
+    const { ProductId } = req.query;
+    const existingProduct = await Product.findOne({ _id: ProductId });
+    if (!existingProduct) {
+      return res.status(404).json({ message: "Product not found." });
+    } else {
+      return res.status(200).json({ existingProduct });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 const allCategories = async (req, res) => {
   try {
     const { name } = req.body;
@@ -133,6 +147,7 @@ const allBanners = async (req, res) => {
 
 module.exports = {
   allProducts,
+  getProduct,
   allBrands,
   allCategories,
   allBanners,
